@@ -1,0 +1,13 @@
+{
+  "name": "ekosistem_projesi",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "live-server --port=8080 --no-browser --open=index.html",
+    "build": "node build.js",
+    "deploy": "npm run build && npx wrangler pages deploy dist --project-name ekosistem"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}

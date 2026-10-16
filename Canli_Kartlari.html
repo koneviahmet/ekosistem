@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Canlı Kartları</title>
+<style>
+:root{--k:#111;--g1:#f1f1f1;--g2:#dcdcdc;--g3:#8a8a8a}
+*{box-sizing:border-box}
+html,body{margin:0;background:#c9cdcb;color:var(--k);font:13px/1.35 "Helvetica Neue",Arial,sans-serif}
+.tools{position:sticky;top:0;z-index:10;background:#16212c;color:#e7eef5;padding:10px 16px;display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;box-shadow:0 2px 8px #0005}
+.tools label{display:flex;align-items:center;gap:6px;font-size:.9rem}
+.tools input[type=number]{width:64px;padding:3px 6px;border-radius:6px;border:1px solid #456;background:#0f1923;color:#fff}
+.tools button{background:#4cc38a;border:0;border-radius:8px;padding:7px 16px;font-weight:700;color:#05200f;cursor:pointer;font-size:.95rem}
+
+
+/* ---------- sayfa ---------- */
+.sheet{width:210mm;height:297mm;margin:12px auto;background:#fff;padding:8mm;display:flex;flex-direction:column;gap:5mm;box-shadow:0 2px 12px #0004;overflow:hidden}
+.cutline{height:0;border-top:1.2px dashed #777;margin:0 -3mm;position:relative}
+.cutline:after{content:"✂  buradan kes";position:absolute;left:4mm;top:-7px;font-size:7.5px;color:#555;background:#fff;padding:0 4px;letter-spacing:.3px}
+
+/* ---------- kart (yalnızca siyah-beyaz) ---------- */
+.card{width:194mm;height:136mm;border:2px solid var(--k);border-radius:3.2mm;display:flex;flex-direction:column;font-size:8.6pt;line-height:1.22;overflow:hidden;background:#fff;position:relative}
+.card:before{content:"";position:absolute;inset:1.1mm;border:.6px solid var(--g3);border-radius:2.3mm;pointer-events:none}
+.chead{display:flex;align-items:center;gap:3mm;padding:2mm 4mm 1.4mm;border-bottom:1.6px solid var(--k)}
+.logo{width:9.5mm;height:9.5mm;flex:none}
+.chead .tt{line-height:1.05}
+.chead .tt b{font-size:13pt;letter-spacing:1.2px;display:block}
+.chead .tt span{font-size:7pt;letter-spacing:.5px;color:#444}
+.chead .f{margin-left:auto;display:flex;gap:4mm;align-items:flex-end;font-weight:700;font-size:8pt}
+.chead .box{display:inline-block;min-width:11mm;border-bottom:1.2px solid var(--k);height:4.8mm;padding:0 1mm;font-weight:700}
+.chead .long{min-width:42mm}
+.cname{display:grid;grid-template-columns:1fr;gap:3.5mm;padding:1.6mm 4mm;background:var(--g1);border-bottom:1px solid var(--g3)}
+.fld{display:flex;align-items:flex-end;gap:1.5mm;font-weight:700}
+.ul{flex:1;border-bottom:1.1px solid var(--k);min-height:4.6mm;font-weight:700;padding-left:1mm;overflow:hidden;white-space:nowrap;font-size:8.6pt}
+.cbody{flex:1;display:grid;grid-template-columns:1.1fr 1fr;min-height:0}
+.col{padding:1.8mm 4mm 1.4mm;display:flex;flex-direction:column;gap:1.5mm;min-height:0}
+.col+.col{border-left:1px solid var(--g3)}
+.sec{display:flex;flex-direction:column;gap:.7mm}
+.sec+.sec{padding-top:1.1mm;border-top:1px dotted var(--g3)}
+.sh{display:flex;align-items:center;gap:1.6mm;font-weight:800;font-size:7.6pt;letter-spacing:.35px;text-transform:uppercase}
+.no{display:inline-flex;align-items:center;justify-content:center;width:4.2mm;height:4.2mm;border-radius:50%;background:var(--k);color:#fff;font-size:7pt;font-weight:800;flex:none}
+.sh small{font-weight:500;text-transform:none;letter-spacing:0;font-size:6.6pt;color:#555}
+.opts{display:flex;flex-wrap:wrap;gap:.7mm 3.6mm;padding-left:.4mm}
+.opt{display:inline-flex;align-items:center;gap:1.3mm;white-space:nowrap}
+.bx{display:inline-block;width:3.8mm;height:3.8mm;border:1.3px solid var(--k);border-radius:.9mm;font-style:normal;font-size:7.5pt;line-height:3.3mm;text-align:center;font-weight:900;background:#fff}
+.sub{font-size:6.8pt;color:#444;font-weight:700;margin-top:.4mm}
+.ln2{border-bottom:1px solid var(--g3);height:4.5mm;font-weight:600;font-size:8pt;overflow:hidden;white-space:nowrap}
+.hint{font-size:6.5pt;color:#555}
+/* puan tablosu */
+table.tr{border-collapse:collapse;width:100%}
+table.tr tr:nth-child(odd){background:var(--g1)}
+table.tr td{padding:.5mm .8mm;vertical-align:middle;font-size:7.7pt}
+table.tr td.n{width:22mm;font-weight:800}
+table.tr td.e{width:12mm;font-size:6pt;color:#444;text-align:center;line-height:1}
+.cir{display:inline-block;width:4.5mm;height:4.5mm;border:1.3px solid var(--k);border-radius:50%;text-align:center;font-size:6.6pt;line-height:4.1mm;font-weight:800;margin:0 .5mm;background:#fff}
+.cir.on{background:var(--k);color:#fff}
+.total{display:flex;align-items:center;gap:2mm;justify-content:flex-end;font-weight:800;font-size:8.6pt;margin-top:.5mm}
+.total .tb{display:inline-block;min-width:10mm;height:5.6mm;border:1.6px solid var(--k);border-radius:1mm;text-align:center;line-height:4.9mm;background:#fff}
+.rule{font-size:6.5pt;color:#444;font-style:italic}
+/* renk (isimle seçilir) */
+.cols{display:grid;grid-template-columns:repeat(5,1fr);gap:.7mm 1mm}
+.cols .opt{font-size:7.3pt;gap:1mm}
+.cols .bx{width:3.5mm;height:3.5mm;line-height:3mm}
+/* çizim */
+.draw{flex:1;border:1.4px solid var(--k);border-radius:1.8mm;min-height:18mm;position:relative;background-image:radial-gradient(#b5b5b5 .6px,transparent .7px);background-size:3mm 3mm;margin-top:.6mm}
+.draw span{position:absolute;left:1.6mm;top:.8mm;font-size:6.5pt;font-weight:700;background:#fff;padding:0 1mm;border-radius:.6mm}
+.draw svg{position:absolute;inset:0;width:100%;height:100%}
+.cfoot{display:flex;align-items:center;gap:3.2mm;padding:1.4mm 4mm 1.8mm;border-top:1.6px solid var(--k);background:var(--g1);font-size:7.4pt;flex-wrap:wrap}
+.cfoot b{font-size:7.2pt;text-transform:uppercase;letter-spacing:.3px}
+
+@media print{
+  html,body{background:#fff}
+  .tools{display:none!important}
+  .sheet{margin:0;box-shadow:none;page-break-after:always;break-after:page}
+  .sheet:last-child{page-break-after:auto;break-after:auto}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+<style id="pgsize">@page{size:A4 portrait;margin:0}</style>
+</head>
+<body>
+
+<div class="tools">
+  <a href="index.html" style="color:#9fd8ff">← Simülasyona dön</a>
+  <b>Canlı Kartları</b>
+  <label>Kart sayısı <input type="number" id="nCards" min="1" max="60" value="9"></label>
+  <button id="bPrint">🖨 Yazdır / PDF</button>
+</div>
+
+<div id="pages"></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const TR=[['Boyut','küçük','büyük'],['Hız','yavaş','hızlı'],['Çoğalma','az yavru','çok yavru'],['Korunma','korunmasız','korunaklı']];
+const COLN=['Kırmızı','Turuncu','Sarı','Yeşil','Turkuaz','Mavi','Mor','Pembe','Kahverengi','Gri'];
+const bx=on=>`<i class="bx">${on?'✔':''}</i>`;
+const opt=(t,on)=>`<span class="opt">${bx(on)}${t}</span>`;
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const LOGO=`<svg class="logo" viewBox="0 0 40 40"><circle cx="20" cy="20" r="11" fill="#fff" stroke="#111" stroke-width="2"/><path d="M12 17 Q20 13 28 18 M11 23 Q20 28 29 22" fill="none" stroke="#111" stroke-width="1.6"/><ellipse cx="20" cy="20" rx="18" ry="5" fill="none" stroke="#111" stroke-width="1.8" transform="rotate(-20 20 20)"/><circle cx="33" cy="8" r="1.6" fill="#111"/><circle cx="6" cy="33" r="1.2" fill="#111"/></svg>`;
+
+
+
+function card(d){
+  d=d||{};const has=(k,v)=>(d[k]||[]).includes(v);
+  const rows=TR.map(([nm,a,b],i)=>`<tr><td class="n">${nm}</td><td class="e">${a}</td><td style="text-align:center;white-space:nowrap">${[1,2,3,4,5].map(k=>`<span class="cir ${d.t&&d.t[i]===k?'on':''}">${k}</span>`).join('')}</td><td class="e">${b}</td></tr>`).join('');
+  const colors=COLN.map(n=>opt(n,d.color===n)).join('');
+  return `<div class="card">
+  <div class="chead">${LOGO}<div class="tt"><b>CANLI KARTI</b></div>
+    <div class="f"><span>Kart no <span class="box">${esc(d.no||'')}</span></span></div></div>
+  <div class="cname">
+    <div class="fld">Canlının adı <span class="ul">${esc(d.name||'')}</span></div>
+  </div>
+  <div class="cbody">
+    <div class="col">
+      <div class="sec"><div class="sh"><span class="no">1</span>Rolü</div>
+        <div class="opts">${opt('Üretici',d.role==='uretici')}${opt('Tüketici',d.role==='tuketici')}${opt('Çürükçül',d.role==='curukcul')}</div></div>
+      <div class="sec"><div class="sh"><span class="no">2</span>Ne yer? <small>(tüketiciysen; birden fazla olabilir)</small></div>
+        <div class="opts">${opt('Bitki / üretici',has('diet','uretici'))}${opt('Otçul hayvan',has('diet','otcul'))}${opt('Etçil hayvan',has('diet','etcil'))}${opt('Ölü madde / leş',has('diet','olu'))}</div>
+        <div class="fld" style="font-size:7.6pt">Yediği canlılar <span class="ul">${esc(d.eats||'')}</span></div>
+        <div class="fld" style="font-size:7.6pt">Kimler onu yer? <span class="ul">${esc(d.eatenBy||'')}</span></div></div>
+      <div class="sec"><div class="sh"><span class="no">3</span>Yaşam alanı ve hareket</div>
+        <div class="opts">${opt('Su',has('hab','su'))}${opt('Kıyı',has('hab','kiyi'))}${opt('Kara',has('hab','kara'))}</div>
+        <div class="opts">${opt('Sabit',d.move==='sabit')}${opt('Yürür/sürünür',d.move==='yuru')}${opt('Yüzer',d.move==='yuzer')}${opt('Uçar',d.move==='ucar')}</div></div>
+      <div class="sec"><div class="sh"><span class="no">4</span>Üreme</div>
+        <div class="opts">${opt('Yumurtlar',d.repro==='yumurta')}${opt('Doğurur',d.repro==='dogurur')}${opt('Tohum/spor',d.repro==='tohum')}${opt('Bölünür',d.repro==='bolunme')}</div>
+        <div class="fld" style="font-size:7.6pt">Bir seferde kaç yavru/tohum? <span class="ul">${esc(d.young||'')}</span></div></div>
+      <div class="sec" style="flex:1"><div class="sh"><span class="no">5</span>Uyum <small>(yeni gezegende nasıl hayatta kalır?)</small></div>
+        <div class="opts">${opt('Az ışığa',has('adapt','isik'))}${opt('Sıcak–soğuğa',has('adapt','sicaklik'))}${opt('Kıtlıkta uykuya geçer',has('adapt','kitlik'))}</div>
+        <div class="ln2">${esc(d.adaptTxt||'')}</div><div class="ln2"></div></div>
+    </div>
+    <div class="col">
+      <div class="sec"><div class="sh"><span class="no">6</span>Özellik puanları</div>
+        <div class="rule">Her satırda 1 daire işaretle. Bitki ve çürükçüllerde “Hız”, yayılma mesafesidir.</div>
+        <table class="tr">${rows}</table></div>
+      <div class="sec"><div class="sh"><span class="no">7</span>Rengi <small>(simülasyonda bu renkte görünür)</small></div>
+        <div class="cols">${colors}</div></div>
+      <div class="sec" style="flex:1;display:flex;flex-direction:column"><div class="sh"><span class="no">8</span>Canlının çizimi</div>
+        <div class="draw"></div></div>
+    </div>
+  </div>
+  <div class="cfoot">
+    <span class="fld"><b>Başlangıç sayısı</b> <span class="ul" style="min-width:14mm;flex:none"></span></span></div>
+  </div>`;
+}
+function render(){
+  const n=Math.max(1,+$('#nCards').value||1);
+  let html='';
+  for(let i=1;i<=n;i+=2){
+    html+=`<div class="sheet">${card({no:i})}<div class="cutline"></div>${i+1<=n?card({no:i+1}):''}</div>`;
+  }
+  $('#pages').innerHTML=html;
+}
+$('#nCards').addEventListener('input',render);
+$('#bPrint').onclick=()=>window.print();
+render();
+</script>
+</body>
+</html>
